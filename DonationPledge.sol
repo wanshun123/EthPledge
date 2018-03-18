@@ -1,25 +1,23 @@
 pragma solidity ^0.4.2;
 
-contract DonationMatcher {
+contract EthPledge {
     
-    struct DonationsToMatch {
-        address sender;
-        address recipient;
-        uint amountToTransfer;
+    struct Campaign {
+        address benefactor; // Person starting the campaign, who puts in some ETH to donate to an Ethereum address. 
+        address charity;
+        uint amountPledged;
         uint amountRaised;
         uint donationsReceived;
-        uint multiplier; // If this was 5, for example, other donators would only need to put up 1/5th of tne amount the person creating the donation does
+        uint multiplier; // If this was 5, for example, other donators would only need to put up 1/5th of the amount the benefactor does for the pledge to be successful and all funds to be donated. Eg. Benefactor pledges 10 ETH, then after only 2 ETH is contributed to the campaign, all funds are send to the charity and the campaign ends
         bool active;
         bool successful;
         uint timeStarted;
-        bytes32 description;
+        bytes32 description; // Can only be 32 characters long, probably will just say the charity being donated to. The user would enter this on the website and then it'd be converted to bytes32 (and converted back to a string when displayed on the website)
     }
     
-    mapping (uint => DonationsToMatch) public donation;
+    mapping (uint => Campaign) public campaign;
     
     mapping (address => uint[]) public campaignsStartedByUser;
-    
-    // Keep record of donations for each user to each campaign, so two extra mappings for campaign ID's contributed to, and amounts
     
     mapping (address => mapping(uint => uint)) public addressToCampaignIDToFundsDonated;
     
@@ -29,50 +27,79 @@ contract DonationMatcher {
     
     uint public totalDonations;
     
-    function createDonation (address recipient, uint multiplier, bytes32 description) payable {
+    uint public totalETHraised;
+    
+    function createDonation (address charity, uint multiplier, bytes32 description) payable {
         require (msg.value > 0);
         require (multiplier > 0);
-        donation[totalCampaigns].sender = msg.sender;
-        donation[totalCampaigns].recipient = recipient;
-        donation[totalCampaigns].description = description;
-        donation[totalCampaigns].multiplier = multiplier;
-        donation[totalCampaigns].timeStarted = now;
-        donation[totalCampaigns].amountToTransfer = msg.value;
-        donation[totalCampaigns].active = true;
+        campaign[totalCampaigns].benefactor = msg.sender;
+        campaign[totalCampaigns].charity = charity;
+        campaign[totalCampaigns].description = description;
+        campaign[totalCampaigns].multiplier = multiplier;
+        campaign[totalCampaigns].timeStarted = now;
+        campaign[totalCampaigns].amountPledged = msg.value;
+        campaign[totalCampaigns].active = true;
         campaignsStartedByUser[msg.sender].push(totalCampaigns);
+        totalETHraised += msg.value;
         totalCampaigns++;
     }
     
-    function cancelDonation (uint donationID) {
-        // Say the person starting it gets half their funds back? hmm
-        // OR: the amount raised from (others * multiplier + raised from others) goes to the recipient, rest gets refunded to starter of the donation
-        require (msg.sender == donation[donationID].sender);
-        donation[donationID].active = false;
-        donation[donationID].successful = false;
-        uint amountToSendToRecipient = (donation[donationID].amountRaised * donation[donationID].multiplier) + donation[donationID].amountRaised;
-        uint amountToSendToStarter = donation[donationID].amountToTransfer - amountToSendToRecipient;
-        donation[donationID].recipient.transfer(amountToSendToRecipient);
-        donation[donationID].sender.transfer(amountToSendToStarter);
+    function cancelDonation (uint campaignID) {
+        require (msg.sender == campaign[campaignID].benefactor);
+        campaign[campaignID].active = false;
+        campaign[campaignID].successful = false;
+        uint amountToSendTocharity = (campaign[campaignID].amountRaised * campaign[campaignID].multiplier) + campaign[campaignID].amountRaised;
+        uint amountToSendToStarter = campaign[campaignID].amountPledged - amountToSendTocharity;
+        campaign[campaignID].charity.transfer(amountToSendTocharity);
+        campaign[campaignID].benefactor.transfer(amountToSendToStarter);
         
     }
     
-    function contributeToDonation (uint donationID) payable {
+    function contributeToDonation (uint campaignID) payable {
         require (msg.value > 0);
-        require (donation[donationID].active = true);
-        campaignIDsDonatedToByUser[msg.sender].push(donationID);
-        addressToCampaignIDToFundsDonated[msg.sender][donationID] += msg.value;
+        require (campaign[campaignID].active = true);
+        campaignIDsDonatedToByUser[msg.sender].push(campaignID);
+        addressToCampaignIDToFundsDonated[msg.sender][campaignID] += msg.value;
+        campaign[campaignID].donationsReceived++;
         totalDonations++;
-        donation[donationID].amountRaised += msg.value;
-        if (donation[donationID].amountRaised >= (donation[donationID].amountToTransfer / donation[donationID].multiplier)) {
+        totalETHraised += msg.value;
+        campaign[campaignID].amountRaised += msg.value;
+        if (campaign[campaignID].amountRaised >= (campaign[campaignID].amountPledged / campaign[campaignID].multiplier)) {
             // Target reached
-            donation[donationID].recipient.transfer(donation[donationID].amountRaised + donation[donationID].amountToTransfer);
-            donation[donationID].active = false;
-            donation[donationID].successful = true;
+            campaign[campaignID].charity.transfer(campaign[campaignID].amountRaised + campaign[campaignID].amountPledged);
+            campaign[campaignID].active = false;
+            campaign[campaignID].successful = true;
         }
     }
     
-    function returnHowMuchMoreETHNeeded (uint donationID) view returns (uint) {
-        return (donation[donationID].amountToTransfer / donation[donationID].multiplier - donation[donationID].amountRaised);
+    // Below are view functions that an external contract can call to get information on a campaign ID or user
+    
+    function returnHowMuchMoreETHNeeded (uint campaignID) view returns (uint) {
+        return (campaign[campaignID].amountPledged / campaign[campaignID].multiplier - campaign[campaignID].amountRaised);
+    }
+    
+    function generalInfo() view returns (uint, uint, uint) {
+        return (totalCampaigns, totalDonations, totalETHraised);
+    }
+    
+    // Below two functions have to be split into two parts, otherwise there are call-stack too deep errors
+    
+    function lookupCampaignPart1 (uint campaignID) view returns (address, address, uint, uint, uint) {
+        return (campaign[campaignID].benefactor, campaign[campaignID].charity, campaign[campaignID].amountPledged, campaign[campaignID].amountRaised,campaign[campaignID].donationsReceived);
+    }
+    
+    function lookupCampaignPart2 (uint campaignID) view returns (uint, bool, bool, uint, bytes32) {
+        return (campaign[campaignID].multiplier, campaign[campaignID].active, campaign[campaignID].successful, campaign[campaignID].timeStarted, campaign[campaignID].description);
+    }
+    
+    // Below two functions are probably not necessary, but just in case
+    
+    function lookupUserDonationHistoryByCampaignID (address user) view returns (uint[]) {
+        return (campaignIDsDonatedToByUser[user]);
+    }
+    
+    function lookupAmountUserDonatedToCampaign (address user, uint campaignID) view returns (uint) {
+        return (addressToCampaignIDToFundsDonated[user][campaignID]);
     }
     
 }
