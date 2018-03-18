@@ -88,51 +88,52 @@ window.addEventListener('load', function () {
         case '4':
                     // rinkeby
 
-          /*
+/*
           EthPledge.deployed().then(function (contractInstance) {
-              contractInstance.createCampaign("0x443A0FCeD533Cc1F3C780B3DEF81Da471A3b12AD", "1", "0x657468657265756d000000000000000000000000000000000000000000000000", { from: web3.eth.accounts[0], value: 50000000000000000}).then(function (result) {
+              contractInstance.createCampaign("0xF66b365bEeDF4a96A011Bd47205091e783437565", "1", "0x657468657265756d000000000000000000000000000000000000000000000000", { from: web3.eth.accounts[0], value: 30000000000000000}).then(function (result) {
 
               })
           })
-          */
+*/
 
           EthPledge.deployed().then(function (contractInstance) {
             contractInstance.generalInfo.call().then(function (result) {
               // console.log(result[0].c[0])
               totalCampaigns = result[0].c[0]
-                console.log(totalCampaigns)
+              console.log(totalCampaigns)
+
+
+
+                EthPledge.deployed().then(function (contractInstance) {
+                    const displayCampaigns = async function () {
+                        for (i = totalCampaigns - 1; i >= 0; i--) {
+                            console.log('?')
+                            const data = await contractInstance.lookupCampaignPart1.call(i).then(function (results) {
+
+                                console.log(results)
+
+
+                                /*
+                                p = document.createElement('p')
+                                p.className = 'bubble'
+                                p.innerHTML = '<userMessages>' + completeStringNoHTML + '</userMessages>' + '<messageInfo>' + '<br>' + '[Message #' + (i + 1) + ' by <a href="http://cryptospeech.com/' + address + '"' + 'target=""' + '>' + address + '</a>' + ' -- posted at ' + date.toLocaleString() + ' -- <a href="http://cryptospeech.com/' + messageLink + '">PERMALINK</a>]' + '</messageInfo>'
+                                document.body.appendChild(p)
+                                */
+
+                            })
+                        }
+                    }
+
+                    displayCampaigns().then(() => {
+                        console.log('done')
+                }).catch((e) => {
+                        console.error(e)
+                })
+                })
+
+
             })
           })
-
-          EthPledge.deployed().then(function (contractInstance) {
-              const displayCampaigns = async function () {
-                  for (i = totalCampaigns; i >= 0; i--) {
-                    console.log('?')
-                      const data = await contractInstance.lookupCampaignPart1.call(i).then(function (results) {
-
-                              console.log(results)
-
-
-                              /*
-                              p = document.createElement('p')
-                              p.className = 'bubble'
-                              p.innerHTML = '<userMessages>' + completeStringNoHTML + '</userMessages>' + '<messageInfo>' + '<br>' + '[Message #' + (i + 1) + ' by <a href="http://cryptospeech.com/' + address + '"' + 'target=""' + '>' + address + '</a>' + ' -- posted at ' + date.toLocaleString() + ' -- <a href="http://cryptospeech.com/' + messageLink + '">PERMALINK</a>]' + '</messageInfo>'
-                              document.body.appendChild(p)
-                              */
-
-                      })
-                  }
-              }
-
-              displayCampaigns().then(() => {
-                  console.log('done')
-          }).catch((e) => {
-                  console.error(e)
-          })
-          })
-
-
-
 
 
             break
