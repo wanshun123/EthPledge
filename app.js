@@ -15,7 +15,7 @@ var EthPledge = contract(EthPledge_artifacts)
 var accounts
 var account
 
-var i, j
+var i, j, p
 
 var totalCampaigns
 
@@ -69,6 +69,8 @@ window.addEventListener('load', function () {
     window.web3 = new Web3(web3.currentProvider)
 
     let main = document.getElementById('maintable')
+
+    let campaignsTables = document.getElementById('campaignTables')
 
 
     web3.version.getNetwork((err, netId) => {
@@ -156,6 +158,13 @@ window.addEventListener('load', function () {
                                 console.log('successful: ' + successful)
                                 console.log('timeStarted: ' + timeStarted)
                                 console.log('description: ' + description)
+
+
+
+                                p = document.createElement('p')
+                                p.className = 'campaignTables'
+                                p.innerHTML = '<b>Pledge ID ' +
+                                campaignsTables.appendChild(p)
 
                             })
 
