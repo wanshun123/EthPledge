@@ -19,6 +19,19 @@ var i, j, p
 
 var totalCampaigns
 
+var iD
+
+var benefactor = []
+var charity = []
+var amountPledged = []
+var amountRaised = []
+var donationsReceived = []
+var multiplier = []
+var active = []
+var successful = []
+var timeStarted = []
+var description = []
+
     window.buyRock = function () {
 
     },
@@ -53,7 +66,40 @@ window.sell = function () {
 
 }
 
-window.transfer = function () {
+window.contribute = function () {
+
+    $('number').click(function() {
+        iD = this.id
+
+        console.log(iD)
+
+        divContent.innerHTML = '<div id="userInfo"></div><div id="infoBox"></div><div id="statusLeft"></div>'
+
+        document.getElementById('myNav').style.width = '100%'
+
+        userInfo.innerHTML = '<h4>Contribute to Pledge ID ' + iD + '</h4><br>'
+
+        p = document.createElement('p')
+        p.className = 'campaignTables'
+        if (multiplier[iD] == 1) {
+            p.innerHTML = '<b>Pledge ID ' + iD + '</b>: <i>' + description[iD] + '</i> <br> Begun by address ' + benefactor[iD] + ', who has <b>pledged to donate ' + amountPledged[iD] + ' Ether</b> to address ' + charity[iD] + '. <u>So far ' + amountRaised[iD] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[iD] + ' donations. For this pledge to be successful, ' + amountPledged[iD] + ' Ether would need to be contributed by others. This pledge has an <u>active status of ' + active[iD] + '</u> and a <u>successful status of ' + successful[iD] + '</u>. It was started at ' + timeStarted[iD] + '.'
+        } else {
+            p.innerHTML = '<b>Pledge ID ' + iD + '</b>: <i>' + description[iD] + '</i> <br> Begun by address ' + benefactor[iD] + ', who has pledged to donate <b>' + amountPledged[iD] + ' Ether</b> to address ' + charity[iD] + '. So far ' + amountRaised[iD] + ' Ether has been contributed to this pledge over ' + donationsReceived[iD] + ' donations. This pledge has been setup with a multiplier of ' + multiplier[iD] + ', so others would need to contribute an extra 1/' + multiplier[iD] + ' of the amount pledged of ' + amountPledged[iD] + ' for it to be marked as successful. This pledge has an active status of ' + active[iD] + ' and a successful status of ' + successful[iD] + '. It was started at ' + timeStarted[iD] + '.'
+        }
+        infoBox.appendChild(p)
+
+        EthPledge.deployed().then(function (contractInstance) {
+            contractInstance.returnHowMuchMoreETHNeeded(iD).then(function (result) {
+                console.log(result + ' is how much more eth needed')
+                
+                
+                
+            })
+        })
+
+        statusLeft.innerHTML = '<hr>'
+
+    });
 
 }
 
@@ -72,6 +118,11 @@ window.addEventListener('load', function () {
 
     let campaignsTables = document.getElementById('campaignTables')
 
+    let infoBox = document.getElementById('infoBox')
+
+    let divContent = document.getElementById('divContent')
+
+    let statusLeft = document.getElementById('statusLeft')
 
     web3.version.getNetwork((err, netId) => {
       switch (netId) {
@@ -109,17 +160,6 @@ window.addEventListener('load', function () {
               console.log(totalCampaigns)
 
                 EthPledge.deployed().then(function (contractInstance) {
-
-                    var benefactor = []
-                    var charity = []
-                    var amountPledged = []
-                    var amountRaised = []
-                    var donationsReceived = []
-                    var multiplier = []
-                    var active = []
-                    var successful = []
-                    var timeStarted = []
-                    var description = []
 
                     const displayCampaigns = async function () {
                         for (i = totalCampaigns - 1; i >= 0; i--) {
@@ -181,7 +221,7 @@ window.addEventListener('load', function () {
                                 p = document.createElement('p')
                                 p.className = 'campaignTables'
                                 if (multiplier[j] == 1) {
-                                    p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has <b>pledged to donate ' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. <u>So far ' + amountRaised[j] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[j] + ' donations. For this pledge to be successful, ' + amountPledged[j] + ' Ether would need to be contributed by others. This pledge has an <u>active status of ' + active[j] + '</u> and a <u>successful status of ' + successful[j] + '</u>. It was started at ' + timeStarted[j] + '. <br><hr>fds'
+                                    p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has <b>pledged to donate ' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. <u>So far ' + amountRaised[j] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[j] + ' donations. For this pledge to be successful, ' + amountPledged[j] + ' Ether would need to be contributed by others. This pledge has an <u>active status of ' + active[j] + '</u> and a <u>successful status of ' + successful[j] + '</u>. It was started at ' + timeStarted[j] + '. <br><hr><number id="' + j + '"><a href="#!" onclick="contribute()">Contribute to this pledge</a></number> | <a href="http://www.ethpledge.com/id/' + j + '">Permalink</a>'
                                 } else {
                                     p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has pledged to donate <b>' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. So far ' + amountRaised[j] + ' Ether has been contributed to this pledge over ' + donationsReceived[j] + ' donations. This pledge has been setup with a multiplier of ' + multiplier[j] + ', so others would need to contribute an extra 1/' + multiplier[j] + ' of the amount pledged of ' + amountPledged[j] + ' for it to be marked as successful. This pledge has an active status of ' + active[j] + ' and a successful status of ' + successful[j] + '. It was started at ' + timeStarted[j] + '.'
                                 }
