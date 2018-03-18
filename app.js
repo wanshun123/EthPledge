@@ -88,16 +88,26 @@ window.contribute = function () {
         }
         infoBox.appendChild(p)
 
-        EthPledge.deployed().then(function (contractInstance) {
-            contractInstance.returnHowMuchMoreETHNeeded(iD).then(function (result) {
-                console.log(result + ' is how much more eth needed')
-                
-                
-                
-            })
-        })
+        if (active[iD].toString() != 'true') {
+            statusLeft.innerHTML = '<hr>This pledge is no longer active.'
+        } else {
+            EthPledge.deployed().then(function (contractInstance) {
+                contractInstance.returnHowMuchMoreETHNeeded(iD).then(function (result) {
+                    console.log(result + ' is how much more eth needed')
 
-        statusLeft.innerHTML = '<hr>'
+                    if (+result > 0) {
+                        statusLeft.innerHTML = '<hr><b>This pledge requires ' + result/1000000000000000000 + ' more Ether to be contributed before it becomes successful.</b><hr><div class="form-group">\n' +
+                            '            <textarea class="form-control" rows="1" id="amountToContribute" placeholder="Amount of Ether to contribute - can enter decimals (eg. 0.0123)" style="overflow:auto"></textarea>\n' +
+                            '        </div>\n' +
+                            '\n' +
+                            '        <a href="#!" onclick="submitContribution()" button id="submitContributionButton" class="btn btn-primary btn-block">Contribute!</a>'
+                    }
+
+                })
+            })
+        }
+
+
 
     });
 
