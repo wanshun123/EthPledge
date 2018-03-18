@@ -15,7 +15,7 @@ var EthPledge = contract(EthPledge_artifacts)
 var accounts
 var account
 
-var i
+var i, j
 
 var totalCampaigns
 
@@ -102,23 +102,14 @@ window.addEventListener('load', function () {
               totalCampaigns = result[0].c[0]
               console.log(totalCampaigns)
 
-
-
                 EthPledge.deployed().then(function (contractInstance) {
                     const displayCampaigns = async function () {
                         for (i = totalCampaigns - 1; i >= 0; i--) {
-                            console.log('?')
+                            console.log('i of value ' + i + ' starting')
+
                             const data = await contractInstance.lookupCampaignPart1.call(i).then(function (results) {
 
                                 console.log(results)
-
-
-                                /*
-                                p = document.createElement('p')
-                                p.className = 'bubble'
-                                p.innerHTML = '<userMessages>' + completeStringNoHTML + '</userMessages>' + '<messageInfo>' + '<br>' + '[Message #' + (i + 1) + ' by <a href="http://cryptospeech.com/' + address + '"' + 'target=""' + '>' + address + '</a>' + ' -- posted at ' + date.toLocaleString() + ' -- <a href="http://cryptospeech.com/' + messageLink + '">PERMALINK</a>]' + '</messageInfo>'
-                                document.body.appendChild(p)
-                                */
 
                             })
                         }
@@ -126,6 +117,31 @@ window.addEventListener('load', function () {
 
                     displayCampaigns().then(() => {
                         console.log('done')
+
+                    const displayCampaigns2 = async function () {
+                        for (j = totalCampaigns - 1; j >= 0; j--) {
+                            console.log('j is ' + j)
+
+
+                            const data2 = await
+                            contractInstance.lookupCampaignPart2.call(j).then(function (results) {
+
+                              console.log('printing for j of ' + j)
+
+                                console.log(results)
+
+                            })
+                            
+                        }
+                    }
+
+                    displayCampaigns2().then(() => {
+                        console.log('j of value ' + j + ' completed')
+                }).catch((e) => {
+                        console.error(e)
+                })
+
+
                 }).catch((e) => {
                         console.error(e)
                 })
