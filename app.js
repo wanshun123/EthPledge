@@ -98,6 +98,10 @@ window.addEventListener('load', function () {
           })
 */
 
+          // campaignTables.innerHTML = '<img src="https://www.cryptosprites.com/sprites/' + 'spinner' + '.gif" width="200px" height="200px" align="middle" style="vertical-align:bottom" class="center">'
+
+          campaignTables.innerHTML = '<img src="https://www.cryptosprites.com/sprites/' + 'spinner' + '.gif" align="middle" style="vertical-align:bottom" class="center">'
+
           EthPledge.deployed().then(function (contractInstance) {
             contractInstance.generalInfo.call().then(function (result) {
               // console.log(result[0].c[0])
@@ -106,7 +110,16 @@ window.addEventListener('load', function () {
 
                 EthPledge.deployed().then(function (contractInstance) {
 
-                  var benefactor, charity, amountPledged, amountRaised, donationsReceived, multiplier, active, successful, timeStarted, description
+                    var benefactor = []
+                    var charity = []
+                    var amountPledged = []
+                    var amountRaised = []
+                    var donationsReceived = []
+                    var multiplier = []
+                    var active = []
+                    var successful = []
+                    var timeStarted = []
+                    var description = []
 
                     const displayCampaigns = async function () {
                         for (i = totalCampaigns - 1; i >= 0; i--) {
@@ -116,17 +129,17 @@ window.addEventListener('load', function () {
 
                                 // console.log(results)
 
-                                benefactor = results[0]
-                                charity = results[1]
-                                amountPledged = results[2]
-                                amountRaised = results[3]
-                                donationsReceived = results[4]
+                                benefactor[i] = results[0]
+                                charity[i] = results[1]
+                                amountPledged[i] = results[2]/1000000000000000000
+                                amountRaised[i] = results[3]/1000000000000000000
+                                donationsReceived[i] = results[4]
 
-                                console.log('benefactor: ' + benefactor)
-                                console.log('charity: ' + charity)
-                                console.log('amountPledged: ' + amountPledged)
-                                console.log('amountRaised: ' + amountRaised)
-                                console.log('donationsReceived: ' + donationsReceived)
+                                console.log('benefactor: ' + benefactor[i])
+                                console.log('charity: ' + charity[i])
+                                console.log('amountPledged: ' + amountPledged[i])
+                                console.log('amountRaised: ' + amountRaised[i])
+                                console.log('donationsReceived: ' + donationsReceived[i])
 
                             })
                         }
@@ -134,6 +147,8 @@ window.addEventListener('load', function () {
 
                     displayCampaigns().then(() => {
                         console.log('done')
+
+                    campaignTables.innerHTML = ''
 
                     const displayCampaigns2 = async function () {
                         for (j = totalCampaigns - 1; j >= 0; j--) {
@@ -147,23 +162,29 @@ window.addEventListener('load', function () {
 
                                 console.log(results)
 
-                                multiplier = results[0]
-                                active = results[1]
-                                successful = results[2]
-                                timeStarted = results[3]
-                                description = web3.toAscii(results[4])
+                                var date = new Date(+results[3] * 1000)
 
-                                console.log('multiplier: ' + multiplier)
-                                console.log('active: ' + active)
-                                console.log('successful: ' + successful)
-                                console.log('timeStarted: ' + timeStarted)
-                                console.log('description: ' + description)
+                                multiplier[j] = results[0]
+                                active[j] = results[1]
+                                successful[j] = results[2]
+                                timeStarted[j] = date.toLocaleString()
+                                description[j] = web3.toAscii(results[4])
+
+                                console.log('multiplier: ' + multiplier[j])
+                                console.log('active: ' + active[j])
+                                console.log('successful: ' + successful[j])
+                                console.log('timeStarted: ' + timeStarted[j])
+                                console.log('description: ' + description[j])
 
 
 
                                 p = document.createElement('p')
                                 p.className = 'campaignTables'
-                                p.innerHTML = '<b>Pledge ID ' +
+                                if (multiplier[j] == 1) {
+                                    p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has <b>pledged to donate ' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. <u>So far ' + amountRaised[j] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[j] + ' donations. For this pledge to be successful, ' + amountPledged[j] + ' Ether would need to be contributed by others. This pledge has an <u>active status of ' + active[j] + '</u> and a <u>successful status of ' + successful[j] + '</u>. It was started at ' + timeStarted[j] + '. <br><hr>fds'
+                                } else {
+                                    p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has pledged to donate <b>' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. So far ' + amountRaised[j] + ' Ether has been contributed to this pledge over ' + donationsReceived[j] + ' donations. This pledge has been setup with a multiplier of ' + multiplier[j] + ', so others would need to contribute an extra 1/' + multiplier[j] + ' of the amount pledged of ' + amountPledged[j] + ' for it to be marked as successful. This pledge has an active status of ' + active[j] + ' and a successful status of ' + successful[j] + '. It was started at ' + timeStarted[j] + '.'
+                                }
                                 campaignsTables.appendChild(p)
 
                             })
