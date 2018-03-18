@@ -103,13 +103,28 @@ window.addEventListener('load', function () {
               console.log(totalCampaigns)
 
                 EthPledge.deployed().then(function (contractInstance) {
+
+                  var benefactor, charity, amountPledged, amountRaised, donationsReceived, multiplier, active, successful, timeStarted, description
+
                     const displayCampaigns = async function () {
                         for (i = totalCampaigns - 1; i >= 0; i--) {
                             console.log('i of value ' + i + ' starting')
 
                             const data = await contractInstance.lookupCampaignPart1.call(i).then(function (results) {
 
-                                console.log(results)
+                                // console.log(results)
+
+                                benefactor = results[0]
+                                charity = results[1]
+                                amountPledged = results[2]
+                                amountRaised = results[3]
+                                donationsReceived = results[4]
+
+                                console.log('benefactor: ' + benefactor)
+                                console.log('charity: ' + charity)
+                                console.log('amountPledged: ' + amountPledged)
+                                console.log('amountRaised: ' + amountRaised)
+                                console.log('donationsReceived: ' + donationsReceived)
 
                             })
                         }
@@ -130,13 +145,25 @@ window.addEventListener('load', function () {
 
                                 console.log(results)
 
+                                multiplier = results[0]
+                                active = results[1]
+                                successful = results[2]
+                                timeStarted = results[3]
+                                description = web3.toAscii(results[4])
+
+                                console.log('multiplier: ' + multiplier)
+                                console.log('active: ' + active)
+                                console.log('successful: ' + successful)
+                                console.log('timeStarted: ' + timeStarted)
+                                console.log('description: ' + description)
+
                             })
-                            
+
                         }
                     }
 
                     displayCampaigns2().then(() => {
-                        console.log('j of value ' + j + ' completed')
+                        console.log('all done')
                 }).catch((e) => {
                         console.error(e)
                 })
