@@ -1,0 +1,99 @@
+<!--[if IE]>
+<meta http-equiv="refresh" content="0; url=http://example.com/" />
+<![endif]-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EthPledge [BETA]</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+    <script src="./app.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-default">
+    <div class="container text-center">
+        <div class="navbar-header">
+            <a class="navbar-brand">EthPledge [BETA]</a>
+        </div>
+        <div id="navbar" class="navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="#" onclick="openNav()">How it Works</a></li>
+                <li><a href="#">Create a Pledge</a></li>
+                <li><a href="#">Smart Contract Code</a></li>
+                <li><p class="navbar-text">Get in touch: contact@EthPledge.com</p></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+
+<div id="myNav" class="overlay">
+
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+
+    <div class="overlay-content" id="divContent">
+
+        <div id="userInfo"></div>
+
+        <div id="infoBox"></div>
+
+        <div id="statusLeft"></div>
+
+        <!--
+        <div class="form-group">
+            <textarea class="form-control" rows="1" id="amountToContribute" placeholder="Amount of Ether to contribute - can enter decimals (eg. 0.0123)" style="overflow:auto"></textarea>
+        </div>
+
+        <a href="#!" onclick="submitContribution()" button id="submitContributionButton" class="btn btn-primary btn-block">Contribute!</a>
+        -->
+
+    </div>
+</div>
+
+
+<div id="particles-js">
+
+    <div id="maintable">
+
+        <p>EthPledge is a decentralized, fully transparent smart contract on the Ethereum blockchain that allows people to pledge to donate a certain amount to a charity, which gets sent only if others match it. A user may pledge to donate 10 Ether to a charity, for example, which will get listed here and will be sent to the charity later only if other people also collectively contribute 10 Ether under that pledge. You can also pledge to donate several times what other people donate, up to a certain amount -- for example, you may choose to put up 10 Ether, which gets sent to the charity if others only contribute 2 Ether.</p>
+
+        <p>Matching pledges of this kind are quite common (companies will often pledge to match all charitable donations their employees make up to a certain amount, for example, or it may just be a casual arrangement between 2 people) and by running on the Ethereum blockchain, EthPledge guarantees 100% transparency as our smart contract code is fully open-source and we can prove it does exactly what we say it does. We strongly welcome any criticism of our smart contract code (verified here) and also recommend reading the How it Works page before creating a pledge or contributing to a pledge.</p>
+
+        <p>Note that as Ethereum is still relatively new at this stage, not many charities have an Ethereum address to take donations yet, though it's our hope that more will come.</p>
+
+        <br>
+
+        <h4>Latest Charity Pledges</h4>
+
+        <br>
+
+        <div id="campaignTables">
+
+            <!--<img src="https://i.imgur.com/bM1TSh7.png" width="100%" height="100%"</a>
+
+            <p>Using web3 detected from external source. If you find that your accounts don't appear or you have 0 MetaCoin, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning.</p>
+
+            <p><a href="#!" disabled="disabled" button id="buyrock" class="btn btn-primary btn-block">???</a></p>-->
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
+
+
+<script src="../particles.js"></script>
+<script src="js/app.js"></script>
+
+
+</body>
+
+</html>
