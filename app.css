@@ -68,14 +68,26 @@ label {
   width: 200px;
 }
 
-p.campaignTables{
-  background: #fffbfd;
+p.campaignTables {
+  background: #fafffa;
   align: middle;
   opacity:1;
   padding:2em;
   border: #ebebeb 1px solid;
   border-radius: 1px;
   // position:relative;
+  overflow: hidden;
+  width:100%;
+}
+
+p.campaignTablesInactive {
+  background: #fafafa;
+  align: middle;
+  opacity:1;
+  padding:2em;
+  border: #ebebeb 1px solid;
+  border-radius: 1px;
+// position:relative;
   overflow: hidden;
   width:100%;
 }
