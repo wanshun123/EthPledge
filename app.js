@@ -62,7 +62,19 @@ window.closeNav = function () {
   document.getElementById('myNav').style.width = '0%'
 }
 
-window.sell = function () {
+window.submitContribution = function () {
+
+    var valueToPledge = $('#amountToContribute').val()
+
+    var valueToPledgeInWei = valueToPledge * 1000000000000000000
+
+    console.log(valueToPledge, valueToPledgeInWei)
+
+    EthPledge.deployed().then(function (contractInstance) {
+        contractInstance.contributeToDonation(iD, { from: web3.eth.accounts[0], value: valueToPledgeInWei}).then(function (result) {
+            divContent.innerHTML = 'good'
+        })
+    })
 
 }
 
@@ -89,7 +101,7 @@ window.contribute = function () {
         infoBox.appendChild(p)
 
         if (active[iD].toString() != 'true') {
-            statusLeft.innerHTML = '<hr>This pledge is no longer active.'
+            statusLeft.innerHTML = '<hr><b>This pledge is no longer active.</b>'
         } else {
             EthPledge.deployed().then(function (contractInstance) {
                 contractInstance.returnHowMuchMoreETHNeeded(iD).then(function (result) {
@@ -229,11 +241,25 @@ window.addEventListener('load', function () {
 
 
                                 p = document.createElement('p')
-                                p.className = 'campaignTables'
-                                if (multiplier[j] == 1) {
-                                    p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has <b>pledged to donate ' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. <u>So far ' + amountRaised[j] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[j] + ' donations. For this pledge to be successful, ' + amountPledged[j] + ' Ether would need to be contributed by others. This pledge has an <u>active status of ' + active[j] + '</u> and a <u>successful status of ' + successful[j] + '</u>. It was started at ' + timeStarted[j] + '. <br><hr><number id="' + j + '"><a href="#!" onclick="contribute()">Contribute to this pledge</a></number> | <a href="http://www.ethpledge.com/id/' + j + '">Permalink</a>'
+                                if (active[j].toString() != 'true') {
+                                    p.className = 'campaignTablesInactive'
                                 } else {
-                                    p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has pledged to donate <b>' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. So far ' + amountRaised[j] + ' Ether has been contributed to this pledge over ' + donationsReceived[j] + ' donations. This pledge has been setup with a multiplier of ' + multiplier[j] + ', so others would need to contribute an extra 1/' + multiplier[j] + ' of the amount pledged of ' + amountPledged[j] + ' for it to be marked as successful. This pledge has an active status of ' + active[j] + ' and a successful status of ' + successful[j] + '. It was started at ' + timeStarted[j] + '.'
+                                    p.className = 'campaignTables'
+                                }
+
+                                if (multiplier[j] == 1) {
+                                    if (active[j].toString() != 'true') {
+                                        p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has <b>pledged to donate ' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. <u>' + amountRaised[j] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[j] + ' donations. This pledge is inactive with a <u>successful status of ' + successful[j] + '</u>. It was started at ' + timeStarted[j] + '. <br><hr>Can\'t contribute - all over! | <a href="http://www.ethpledge.com/id/' + j + '">Permalink</a>'
+                                    } else {
+                                        p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has <b>pledged to donate ' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. <u>So far ' + amountRaised[j] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[j] + ' donations. For this pledge to be successful, ' + amountPledged[j] + ' Ether would need to be contributed by others. This pledge has an <u>active status of ' + active[j] + '</u> and a <u>successful status of ' + successful[j] + '</u>. It was started at ' + timeStarted[j] + '. <br><hr><number id="' + j + '"><a href="#!" onclick="contribute()">Contribute to this pledge</a></number> | <a href="http://www.ethpledge.com/id/' + j + '">Permalink</a>'
+                                    }
+                                } else {
+                                    if (active[j].toString() != 'true') {
+                                        p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has pledged to donate <b>' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. ' + amountRaised[j] + ' Ether has been contributed to this pledge over ' + donationsReceived[j] + ' donations. This pledge has been setup with a multiplier of ' + multiplier[j] + ', so others needed to contribute an extra 1/' + multiplier[j] + ' of the amount pledged of ' + amountPledged[j] + ' for it to be marked as successful. This pledge is no longer active and has a successful status of ' + successful[j] + '. It was started at ' + timeStarted[j] + '. <br><hr>Can\'t contribute - all over! | <a href="http://www.ethpledge.com/id/' + j + '">Permalink</a>'
+                                    } else {
+                                        p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has pledged to donate <b>' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. So far ' + amountRaised[j] + ' Ether has been contributed to this pledge over ' + donationsReceived[j] + ' donations. This pledge has been setup with a multiplier of ' + multiplier[j] + ', so others would need to contribute an extra 1/' + multiplier[j] + ' of the amount pledged of ' + amountPledged[j] + ' for it to be marked as successful. This pledge has an active status of ' + active[j] + ' and a successful status of ' + successful[j] + '. It was started at ' + timeStarted[j] + '. <br><hr><number id="\' + j + \'"><a href="#!" onclick="contribute()">Contribute to this pledge</a></number> | <a href="http://www.ethpledge.com/id/\' + j + \'">Permalink</a>'
+                                    }
+
                                 }
                                 campaignsTables.appendChild(p)
 
