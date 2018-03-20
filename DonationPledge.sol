@@ -2,6 +2,17 @@ pragma solidity ^0.4.2;
 
 contract EthPledge {
     
+    address public owner;
+    
+    function EthPledge() {
+        owner = msg.sender;
+    }
+    
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    
     struct Campaign {
         address benefactor; // Person starting the campaign, who puts in some ETH to donate to an Ethereum address. 
         address charity;
@@ -23,14 +34,26 @@ contract EthPledge {
     
     mapping (address => uint[]) public campaignIDsDonatedToByUser; // Will contain duplicates if a user donates to a campaign twice
     
+    mapping (uint => mapping(address => uint)) public campaignIDToAddressToFundsDonated;
+    
+    struct Donation {
+        address donator;
+        uint amount;
+        uint timeSent;
+    }
+    
+    mapping (uint => mapping(uint => Donation)) public donations;
+    
     uint public totalCampaigns;
     
     uint public totalDonations;
     
     uint public totalETHraised;
     
-    function createDonation (address charity, uint multiplier, bytes32 description) payable {
-        require (msg.value > 0);
+    uint public minimumPledgeAmount = 10**17; // 0.1 Ether
+    
+    function createCampaign (address charity, uint multiplier, bytes32 description) payable {
+        require (msg.value > minimumPledgeAmount);
         require (multiplier > 0);
         campaign[totalCampaigns].benefactor = msg.sender;
         campaign[totalCampaigns].charity = charity;
@@ -60,6 +83,7 @@ contract EthPledge {
         require (campaign[campaignID].active = true);
         campaignIDsDonatedToByUser[msg.sender].push(campaignID);
         addressToCampaignIDToFundsDonated[msg.sender][campaignID] += msg.value;
+        campaignIDToAddressToFundsDonated[campaignID][msg.sender] += msg.value;
         campaign[campaignID].donationsReceived++;
         totalDonations++;
         totalETHraised += msg.value;
@@ -70,6 +94,11 @@ contract EthPledge {
             campaign[campaignID].active = false;
             campaign[campaignID].successful = true;
         }
+    }
+    
+    function adjustMinimumPledgeAmount (uint newMinimum) onlyOwner {
+        require (newMinimum > 0);
+        minimumPledgeAmount = newMinimum;
     }
     
     // Below are view functions that an external contract can call to get information on a campaign ID or user
@@ -92,10 +121,14 @@ contract EthPledge {
         return (campaign[campaignID].multiplier, campaign[campaignID].active, campaign[campaignID].successful, campaign[campaignID].timeStarted, campaign[campaignID].description);
     }
     
-    // Below two functions are probably not necessary, but just in case
+    // Below functions are probably not necessary, but included just in case another contract needs this information in future
     
     function lookupUserDonationHistoryByCampaignID (address user) view returns (uint[]) {
         return (campaignIDsDonatedToByUser[user]);
+    }
+    
+    function lookupAmountUserDonatedToCampaign (address user, uint campaignID) view returns (uint) {
+        return (addressToCampaignIDToFundsDonated[user][campaignID]);
     }
     
     function lookupAmountUserDonatedToCampaign (address user, uint campaignID) view returns (uint) {
