@@ -72,7 +72,7 @@ window.submitContribution = function () {
 
     EthPledge.deployed().then(function (contractInstance) {
         contractInstance.contributeToDonation(iD, { from: web3.eth.accounts[0], value: valueToPledgeInWei}).then(function (result) {
-            divContent.innerHTML = 'good'
+            divContent.innerHTML = '<b>Donation successful! You can close this window.</b>'
         })
     })
 
@@ -209,7 +209,7 @@ window.addEventListener('load', function () {
                     // rinkeby
 
           if (url == '/') {
-              campaignTables.innerHTML = '<img src="https://www.cryptosprites.com/sprites/' + 'spinner' + '.gif" align="middle" style="vertical-align:bottom" class="center">'
+              campaignsTables.innerHTML = '<img src="https://www.cryptosprites.com/sprites/' + 'spinner' + '.gif" align="middle" style="vertical-align:bottom" class="centerloader">'
 
               EthPledge.deployed().then(function (contractInstance) {
                   contractInstance.generalInfo.call().then(function (result) {
@@ -303,21 +303,128 @@ window.addEventListener('load', function () {
 
 
 
-              j = url.substring(5, url.length)
+              j = url.substring(4, url.length)
 
-              main.innerHTML = '<div id="campaignTables"></div><div id="listCampaignDonations"></div><a href="http://www.ethpledge.com">[Return To Homepage]</a>'
+              console.log('j is ' + j)
 
-              loadCampaignTable();
+              main.innerHTML = '<div id="campaignTables"></div><div id="listCampaignDonations"><br><h4>Latest Donations</h4></div><div class="center"><a href="http://www.ethpledge.com"><hr>[Return To Homepage]</a></div>'
 
-              EthPledge.deployed().then(function (contractInstance) {
-                  contractInstance.lookupCampaignPart1.call().then(function (results) {
-                      campaignForm.innerHTML = '<b>Campaign created! Go to the homepage and it should be listed there.</b>'
-                  })
-              })
+              let campaignsTables = document.getElementById('campaignTables')
+
+              campaignsTables.innerHTML = '<img src="https://www.cryptosprites.com/sprites/' + 'spinner' + '.gif" align="middle" style="vertical-align:bottom" class="centerloader">'
+
+
+                      EthPledge.deployed().then(function (contractInstance) {
+
+                          const displayCampaigns = async function () {
+
+                                  const data = await contractInstance.lookupCampaignPart1.call(j).then(function (results) {
+
+                                      // console.log(results)
+
+                                      benefactor[j] = results[0]
+                                      charity[j] = results[1]
+                                      amountPledged[j] = results[2]/1000000000000000000
+                                      amountRaised[j] = results[3]/1000000000000000000
+                                      donationsReceived[j] = results[4]
+
+                                      console.log('benefactor: ' + benefactor[j])
+                                      console.log('charity: ' + charity[j])
+                                      console.log('amountPledged: ' + amountPledged[j])
+                                      console.log('amountRaised: ' + amountRaised[j])
+                                      console.log('donationsReceived: ' + donationsReceived[j])
+
+                                  })
+
+                          }
+
+                          displayCampaigns().then(() => {
+                              console.log('done')
+
+                          campaignTables.innerHTML = ''
+
+                          const displayCampaigns2 = async function () {
+
+                                  console.log('j is ' + j)
+
+
+                                  const data2 = await
+                                  contractInstance.lookupCampaignPart2.call(j).then(function (results) {
+
+                                      console.log('printing for j of ' + j)
+
+                                      console.log(results)
+
+                                      var date = new Date(+results[3] * 1000)
+
+                                      multiplier[j] = results[0]
+                                      active[j] = results[1]
+                                      successful[j] = results[2]
+                                      timeStarted[j] = date.toLocaleString()
+                                      description[j] = web3.toAscii(results[4])
+
+                                      console.log('multiplier: ' + multiplier[j])
+                                      console.log('active: ' + active[j])
+                                      console.log('successful: ' + successful[j])
+                                      console.log('timeStarted: ' + timeStarted[j])
+                                      console.log('description: ' + description[j])
+
+
+
+                                  })
+
+
+                          }
+
+                          displayCampaigns2().then(() => {
+                              console.log('all done')
+
+                          loadCampaignTable()
+
+                          // EthPledge.deployed().then(function (contractInstance) {
+                              const displayDonations = async function () {
+
+                                for (var donationNumber = donationsReceived[j] - 1; donationNumber >= 0; donationNumber--) {
+                                    const data3 = await contractInstance.lookupDonation.call(j, donationNumber).then(function (results) {
+
+                                        var date = new Date(+results[2] * 1000)
+                                        var time = date.toLocaleString()
+
+                                        var amountDonated = results[1] / 1000000000000000000
+
+                                        p = document.createElement('p')
+                                        p.className = 'center'
+                                        p.innerHTML = results[0] + ' donated ' + amountDonated + ' Ether at ' + time
+                                        listCampaignDonations.appendChild(p)
+
+                                    })
+                                }
+
+                              }
+
+                              displayDonations().then(() => {
+                                  console.log('donations number found')
+                          }).catch((e) => {
+                                  console.error(e)
+                          })
+
+                          // })
+
+                      }).catch((e) => {
+                              console.error(e)
+                      })
+
+
+                      }).catch((e) => {
+                              console.error(e)
+                      })
+                      })
+
+
 
           } else if (url == '/create-pledge') {
 
-              main.innerHTML = 'Use the form below to create a pledge to donate an amount of Ether to a certain charity. <i>/Address</i> is the address of the Ethereum account you\'re pledging to donate to, such as 0xb30cb3b3E03A508Db2A0a3e07BA1297b47bb0fb1. <i>Amount</i> is the amount of Ether you\'ll be putting up. <i>Multiplier</i> is how many times more Ether you\'re putting up than what needs to be contributed by others for the pledge to be successful. For example, if you pledge to donate 10 Ether and have a multiplier of 5, others would only need to contribute 2 Ether (10/5) for the pledge to be successful and the Ether to be donated (a multiplier of 1 would probably be most common, where you\'re simply matching everyone else\'s donations by the same amount). <i>Description</i> is a very short description of your pledge (maximum of 32 characters) - probably for this you can just write the organization being donated to.<hr><div id="campaignForm"></div><hr><a href="http://www.ethpledge.com">[Return To Homepage]</a>'
+              main.innerHTML = 'Use the form below to create a pledge to donate an amount of Ether to a certain charity. <i>/Address</i> is the address of the Ethereum account you\'re pledging to donate to, such as 0xb30cb3b3E03A508Db2A0a3e07BA1297b47bb0fb1. <i>Amount</i> is the amount of Ether you\'ll be putting up. <i>Multiplier</i> is how many times more Ether you\'re putting up than what needs to be contributed by others for the pledge to be successful. For example, if you pledge to donate 10 Ether and have a multiplier of 5, others would only need to contribute 2 Ether (10/5) for the pledge to be successful and the Ether to be donated (a multiplier of 1 would probably be most common, where you\'re simply matching everyone else\'s donations by the same amount). <i>Description</i> is a very short description of your pledge (maximum of 32 characters) - probably for this you can just write the organization being donated to.<hr><div id="campaignForm"></div><hr><div class="center"><a href="http://www.ethpledge.com">[Return To Homepage]</a></div>'
 
               campaignForm.innerHTML = '<div class="form-group">\n' +
                   '            <textarea class="form-control" rows="1" id="address" placeholder="Enter the Ethereum address to donate to" style="overflow:auto"></textarea>\n' +
