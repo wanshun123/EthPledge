@@ -34,15 +34,13 @@ contract EthPledge {
     
     mapping (address => uint[]) public campaignIDsDonatedToByUser; // Will contain duplicates if a user donates to a campaign twice
     
-    mapping (uint => mapping(address => uint)) public campaignIDToAddressToFundsDonated;
-    
     struct Donation {
         address donator;
         uint amount;
         uint timeSent;
     }
     
-    mapping (uint => mapping(uint => Donation)) public donations;
+    mapping (uint => mapping(uint => Donation)) public campaignIDtoDonationNumberToDonation;
     
     uint public totalCampaigns;
     
@@ -83,7 +81,11 @@ contract EthPledge {
         require (campaign[campaignID].active = true);
         campaignIDsDonatedToByUser[msg.sender].push(campaignID);
         addressToCampaignIDToFundsDonated[msg.sender][campaignID] += msg.value;
-        campaignIDToAddressToFundsDonated[campaignID][msg.sender] += msg.value;
+        
+        campaignIDtoDonationNumberToDonation[campaignID][campaign[campaignID].donationsReceived].donator = msg.sender;
+        campaignIDtoDonationNumberToDonation[campaignID][campaign[campaignID].donationsReceived].amount = msg.value;
+        campaignIDtoDonationNumberToDonation[campaignID][campaign[campaignID].donationsReceived].timeSent = now;
+        
         campaign[campaignID].donationsReceived++;
         totalDonations++;
         totalETHraised += msg.value;
@@ -111,6 +113,10 @@ contract EthPledge {
         return (totalCampaigns, totalDonations, totalETHraised);
     }
     
+    function lookupDonation (uint campaignID, uint donationNumber) view returns (address, uint, uint) {
+        return (campaignIDtoDonationNumberToDonation[campaignID][donationNumber].donator, campaignIDtoDonationNumberToDonation[campaignID][donationNumber].amount, campaignIDtoDonationNumberToDonation[campaignID][donationNumber].timeSent);
+    }
+    
     // Below two functions have to be split into two parts, otherwise there are call-stack too deep errors
     
     function lookupCampaignPart1 (uint campaignID) view returns (address, address, uint, uint, uint) {
@@ -125,10 +131,6 @@ contract EthPledge {
     
     function lookupUserDonationHistoryByCampaignID (address user) view returns (uint[]) {
         return (campaignIDsDonatedToByUser[user]);
-    }
-    
-    function lookupAmountUserDonatedToCampaign (address user, uint campaignID) view returns (uint) {
-        return (addressToCampaignIDToFundsDonated[user][campaignID]);
     }
     
     function lookupAmountUserDonatedToCampaign (address user, uint campaignID) view returns (uint) {
