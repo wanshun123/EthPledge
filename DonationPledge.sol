@@ -23,7 +23,10 @@ contract EthPledge {
         bool active;
         bool successful;
         uint timeStarted;
-        bytes32 description; // Can only be 32 characters long, probably will just say the charity being donated to. The user would enter this on the website and then it'd be converted to bytes32 (and converted back to a string when displayed on the website)
+        bytes32 descriptionPart1; // Allow a description of up to 132 characters. Each bytes32 part can only hold 32 characters.
+        bytes32 descriptionPart2;
+        bytes32 descriptionPart3;
+        bytes32 descriptionPart4;
     }
     
     mapping (uint => Campaign) public campaign;
@@ -48,35 +51,37 @@ contract EthPledge {
     
     uint public totalETHraised;
     
-    uint public minimumPledgeAmount = 10**17; // 0.1 Ether
+    uint public minimumPledgeAmount = 10**14; // 0.1 Ether
     
-    function createCampaign (address charity, uint multiplier, bytes32 description) payable {
-        require (msg.value > minimumPledgeAmount);
+    function createCampaign (address charity, uint multiplier, bytes32 descriptionPart1, bytes32 descriptionPart2, bytes32 descriptionPart3, bytes32 descriptionPart4) payable {
+        require (msg.value >= minimumPledgeAmount);
         require (multiplier > 0);
         campaign[totalCampaigns].benefactor = msg.sender;
         campaign[totalCampaigns].charity = charity;
-        campaign[totalCampaigns].description = description;
         campaign[totalCampaigns].multiplier = multiplier;
         campaign[totalCampaigns].timeStarted = now;
         campaign[totalCampaigns].amountPledged = msg.value;
         campaign[totalCampaigns].active = true;
+        campaign[totalCampaigns].descriptionPart1 = descriptionPart1;
+        campaign[totalCampaigns].descriptionPart2 = descriptionPart2;
+        campaign[totalCampaigns].descriptionPart3 = descriptionPart3;
+        campaign[totalCampaigns].descriptionPart4 = descriptionPart4;
         campaignsStartedByUser[msg.sender].push(totalCampaigns);
         totalETHraised += msg.value;
         totalCampaigns++;
     }
     
-    function cancelDonation (uint campaignID) {
+    function cancelCampaign (uint campaignID) {
         require (msg.sender == campaign[campaignID].benefactor);
         campaign[campaignID].active = false;
         campaign[campaignID].successful = false;
-        uint amountToSendTocharity = (campaign[campaignID].amountRaised * campaign[campaignID].multiplier) + campaign[campaignID].amountRaised;
-        uint amountToSendToStarter = campaign[campaignID].amountPledged - amountToSendTocharity;
-        campaign[campaignID].charity.transfer(amountToSendTocharity);
-        campaign[campaignID].benefactor.transfer(amountToSendToStarter);
-        
+        uint amountToSendToCharity = (campaign[campaignID].amountRaised * campaign[campaignID].multiplier) + campaign[campaignID].amountRaised;
+        uint amountToSendToBenefactor = campaign[campaignID].amountPledged - amountToSendToCharity;
+        campaign[campaignID].charity.transfer(amountToSendToCharity);
+        campaign[campaignID].benefactor.transfer(amountToSendToBenefactor);
     }
     
-    function contributeToDonation (uint campaignID) payable {
+    function contributeToCampaign (uint campaignID) payable {
         require (msg.value > 0);
         require (campaign[campaignID].active = true);
         campaignIDsDonatedToByUser[msg.sender].push(campaignID);
@@ -119,12 +124,12 @@ contract EthPledge {
     
     // Below two functions have to be split into two parts, otherwise there are call-stack too deep errors
     
-    function lookupCampaignPart1 (uint campaignID) view returns (address, address, uint, uint, uint) {
-        return (campaign[campaignID].benefactor, campaign[campaignID].charity, campaign[campaignID].amountPledged, campaign[campaignID].amountRaised,campaign[campaignID].donationsReceived);
+    function lookupCampaignPart1 (uint campaignID) view returns (address, address, uint, uint, uint, bytes32, bytes32) {
+        return (campaign[campaignID].benefactor, campaign[campaignID].charity, campaign[campaignID].amountPledged, campaign[campaignID].amountRaised,campaign[campaignID].donationsReceived, campaign[campaignID].descriptionPart1, campaign[campaignID].descriptionPart2);
     }
     
-    function lookupCampaignPart2 (uint campaignID) view returns (uint, bool, bool, uint, bytes32) {
-        return (campaign[campaignID].multiplier, campaign[campaignID].active, campaign[campaignID].successful, campaign[campaignID].timeStarted, campaign[campaignID].description);
+    function lookupCampaignPart2 (uint campaignID) view returns (uint, bool, bool, uint, bytes32, bytes32) {
+        return (campaign[campaignID].multiplier, campaign[campaignID].active, campaign[campaignID].successful, campaign[campaignID].timeStarted, campaign[campaignID].descriptionPart3, campaign[campaignID].descriptionPart4);
     }
     
     // Below functions are probably not necessary, but included just in case another contract needs this information in future
