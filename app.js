@@ -30,15 +30,10 @@ var multiplier = []
 var active = []
 var successful = []
 var timeStarted = []
-var description = []
-
-    window.buyRock = function () {
-
-    },
-
-    window.buyMainRock = function () {
-
-    },
+var description1 = []
+var description2 = []
+var description3 = []
+var description4 = []
 
     window.App = {
 
@@ -62,6 +57,14 @@ window.closeNav = function () {
   document.getElementById('myNav').style.width = '0%'
 }
 
+var delay = ( function() {
+    var timer = 0;
+    return function(callback, ms) {
+        clearTimeout (timer);
+        timer = setTimeout(callback, ms);
+    };
+})();
+
 window.submitContribution = function () {
 
     var valueToPledge = $('#amountToContribute').val()
@@ -70,24 +73,78 @@ window.submitContribution = function () {
 
     console.log(valueToPledge, valueToPledgeInWei)
 
+    divContent.innerHTML = '<img src="http://ethpledge.com/' + 'spinner' + '.gif" align="middle" style="vertical-align:bottom" class="centerloader"><br><p><b>Submitting transaction...</b></p>'
+
     EthPledge.deployed().then(function (contractInstance) {
-        contractInstance.contributeToDonation(iD, { from: web3.eth.accounts[0], value: valueToPledgeInWei}).then(function (result) {
-            divContent.innerHTML = '<b>Donation successful! You can close this window.</b>'
+        contractInstance.contributeToCampaign(iD, { from: web3.eth.accounts[0], value: valueToPledgeInWei}).then(function (result) {
+            divContent.innerHTML = '<b>Donation successful! Loading the campaign page...</b>'
+            delay(function(){
+                window.location.replace("http://ethpledge.com/id/" + iD);
+            }, 5000 ); // end delay
         })
     })
 
 }
 
+function cleanString (input) {
+    var output = ''
+    for (var i = 0; i < input.length; i++) {
+        if (input.charCodeAt(i) <= 127) {
+            output += input.charAt(i)
+        }
+    }
+    return output
+}
+
 window.createPledge = function() {
+
+    let message = $('#description').val()
+
+    console.log('message is ' + message)
+
+    var string1 = ''
+    var string2 = ''
+    var string3 = ''
+    var string4 = ''
+
+    if (message.length <= 32) {
+        string1 = message
+    } else if (message.length >= 33 && message.length <= 64) {
+        string1 = message.substring(0, 32)
+        string2 = message.substring(32, message.length)
+    } else if (message.length >= 65 && message.length <= 96) {
+        string1 = message.substring(0, 32)
+        string2 = message.substring(32, 64)
+        string3 = message.substring(64, message.length)
+    } else if (message.length >= 97) {
+        string1 = message.substring(0, 32)
+        string2 = message.substring(32, 64)
+        string3 = message.substring(64, 96)
+        string4 = message.substring(96, 128)
+    }
+
+    console.log('strings are ' + string1, string2, string3, string4)
+
+    string1 = cleanString(string1)
+    string2 = cleanString(string2)
+    string3 = cleanString(string3)
+    string4 = cleanString(string4)
 
     let address = $('#address').val()
     let amountToPledge = $('#amountToPledge').val() * 1000000000000000000
     let multiplier = $('#multiplier').val()
-    let description = $('#description').val()
+
+    campaignForm.innerHTML = '<img src="http://ethpledge.com/' + 'spinner' + '.gif" align="middle" style="vertical-align:bottom" class="centerloader"><br><div class="center"><p>Submitting transaction... if you have cancelled the transaction, refresh the page to reload the form.</p></div>'
 
     EthPledge.deployed().then(function (contractInstance) {
-        contractInstance.createCampaign(address, multiplier, description, { from: web3.eth.accounts[0], value: amountToPledge}).then(function (result) {
-            campaignForm.innerHTML = '<b>Campaign created! Go to the homepage and it should be listed there.</b>'
+        contractInstance.createCampaign(address, multiplier, string1, string2, string3, string4, { from: web3.eth.accounts[0], value: amountToPledge}).then(function (error, result) {
+
+            campaignForm.innerHTML = '<div class="center"><b>Campaign created! Taking you back to the homepage...</b></div>'
+
+            delay(function(){
+                window.location.replace("http://ethpledge.com");
+            }, 5000 ); // end delay
+
         })
     })
 
@@ -109,9 +166,9 @@ window.contribute = function () {
         p = document.createElement('p')
         p.className = 'campaignTables'
         if (multiplier[iD] == 1) {
-            p.innerHTML = '<b>Pledge ID ' + iD + '</b>: <i>' + description[iD] + '</i> <br> Begun by address ' + benefactor[iD] + ', who has <b>pledged to donate ' + amountPledged[iD] + ' Ether</b> to address ' + charity[iD] + '. <u>So far ' + amountRaised[iD] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[iD] + ' donations. For this pledge to be successful, ' + amountPledged[iD] + ' Ether would need to be contributed by others. This pledge has an <u>active status of ' + active[iD] + '</u> and a <u>successful status of ' + successful[iD] + '</u>. It was started at ' + timeStarted[iD] + '.'
+            p.innerHTML = '<b>Pledge ID ' + iD + '</b>: <i>' + description1[iD] + description2[iD] + description3[iD] + description4[iD] + '</i> <br> Begun by address ' + benefactor[iD] + ', who has <b>pledged to donate ' + amountPledged[iD] + ' Ether</b> to address ' + charity[iD] + '. <u>So far ' + amountRaised[iD] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[iD] + ' donations. For this pledge to be successful ' + amountPledged[iD] + ' Ether would need to be contributed by others. This pledge has an <u>active status of ' + active[iD] + '</u> and a <u>successful status of ' + successful[iD] + '</u>. It was started at ' + timeStarted[iD] + '.'
         } else {
-            p.innerHTML = '<b>Pledge ID ' + iD + '</b>: <i>' + description[iD] + '</i> <br> Begun by address ' + benefactor[iD] + ', who has pledged to donate <b>' + amountPledged[iD] + ' Ether</b> to address ' + charity[iD] + '. So far ' + amountRaised[iD] + ' Ether has been contributed to this pledge over ' + donationsReceived[iD] + ' donations. This pledge has been setup with a multiplier of ' + multiplier[iD] + ', so others would need to contribute an extra 1/' + multiplier[iD] + ' of the amount pledged of ' + amountPledged[iD] + ' for it to be marked as successful. This pledge has an active status of ' + active[iD] + ' and a successful status of ' + successful[iD] + '. It was started at ' + timeStarted[iD] + '.'
+            p.innerHTML = '<b>Pledge ID ' + iD + '</b>: <i>' + description1[iD] + description2[iD] + description3[iD] + description4[iD] + '</i> <br> Begun by address ' + benefactor[iD] + ', who has pledged to donate <b>' + amountPledged[iD] + ' Ether</b> to address ' + charity[iD] + '. So far ' + amountRaised[iD] + ' Ether has been contributed to this pledge over ' + donationsReceived[iD] + ' donations. This pledge has been setup with a multiplier of ' + multiplier[iD] + ', so others would need to contribute an extra 1/' + multiplier[iD] + ' of the amount pledged of ' + amountPledged[iD] + ' for it to be marked as successful. This pledge has an active status of ' + active[iD] + ' and a successful status of ' + successful[iD] + '. It was started at ' + timeStarted[iD] + '.'
         }
         infoBox.appendChild(p)
 
@@ -134,13 +191,25 @@ window.contribute = function () {
             })
         }
 
-
-
     });
 
 }
 
 window.remove = function () {
+
+}
+
+window.cancelPledge = function () {
+
+    // main.innerHTML = '<div id="campaignTables"></div><div id="listCampaignDonations"><br><h4>Latest Donations</h4></div><hr><div class="center"><a href="http://www.ethpledge.com">[Return To Homepage]</a><hr>Canceling pledge....</div>'
+
+    console.log('cancelling campaign ' + j)
+
+    EthPledge.deployed().then(function (contractInstance) {
+        contractInstance.cancelCampaign(j, { from: web3.eth.accounts[0]}).then(function (result) {
+            window.location.replace("http://ethpledge.com/id/" + j);
+        })
+    })
 
 }
 
@@ -157,18 +226,19 @@ function loadCampaignTable() {
 
     if (multiplier[j] == 1) {
         if (active[j].toString() != 'true') {
-            p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has <b>pledged to donate ' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. <u>' + amountRaised[j] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[j] + ' donations. This pledge is inactive with a <u>successful status of ' + successful[j] + '</u>. It was started at ' + timeStarted[j] + '. <br><hr>Can\'t contribute - all over! | <a href="http://www.ethpledge.com/id/' + j + '">Permalink</a>'
+            p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description1[j] + description2[j] + description3[j] + description4[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has <b>pledged to donate ' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. <u>' + amountRaised[j] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[j] + ' donations. This pledge is inactive with a <u>successful status of ' + successful[j] + '</u>. It was started at ' + timeStarted[j] + '. <br><hr>Can\'t contribute - all over! | <a href="http://www.ethpledge.com/id/' + j + '">Permalink</a>'
         } else {
-            p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has <b>pledged to donate ' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. <u>So far ' + amountRaised[j] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[j] + ' donations. For this pledge to be successful, ' + amountPledged[j] + ' Ether would need to be contributed by others. This pledge has an <u>active status of ' + active[j] + '</u> and a <u>successful status of ' + successful[j] + '</u>. It was started at ' + timeStarted[j] + '. <br><hr><number id="' + j + '"><a href="#!" onclick="contribute()">Contribute to this pledge</a></number> | <a href="http://www.ethpledge.com/id/' + j + '">Permalink</a>'
+            p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description1[j] + description2[j] + description3[j] + description4[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has <b>pledged to donate ' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. <u>So far ' + amountRaised[j] + ' Ether has been contributed</u> to this pledge over ' + donationsReceived[j] + ' donations. For this pledge to be successful ' + amountPledged[j] + ' Ether would need to be contributed by others. This pledge has an <u>active status of ' + active[j] + '</u> and a <u>successful status of ' + successful[j] + '</u>. It was started at ' + timeStarted[j] + '. <br><hr><number id="' + j + '"><a href="#!" onclick="contribute()">Contribute to this pledge</a></number> | <a href="http://www.ethpledge.com/id/' + j + '">Permalink</a>'
         }
     } else {
         if (active[j].toString() != 'true') {
-            p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has pledged to donate <b>' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. ' + amountRaised[j] + ' Ether has been contributed to this pledge over ' + donationsReceived[j] + ' donations. This pledge has been setup with a multiplier of ' + multiplier[j] + ', so others needed to contribute an extra 1/' + multiplier[j] + ' of the amount pledged of ' + amountPledged[j] + ' for it to be marked as successful. This pledge is no longer active and has a successful status of ' + successful[j] + '. It was started at ' + timeStarted[j] + '. <br><hr>Can\'t contribute - all over! | <a href="http://www.ethpledge.com/id/' + j + '">Permalink</a>'
+            p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description1[j] + description2[j] + description3[j] + description4[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has pledged to donate <b>' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. ' + amountRaised[j] + ' Ether has been contributed to this pledge over ' + donationsReceived[j] + ' donations. This pledge has been setup with a multiplier of ' + multiplier[j] + ', so others needed to contribute an extra 1/' + multiplier[j] + ' of the amount pledged of ' + amountPledged[j] + ' for it to be marked as successful. This pledge is no longer active and has a successful status of ' + successful[j] + '. It was started at ' + timeStarted[j] + '. <br><hr>Can\'t contribute - all over! | <a href="http://www.ethpledge.com/id/' + j + '">Permalink</a>'
         } else {
-            p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has pledged to donate <b>' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. So far ' + amountRaised[j] + ' Ether has been contributed to this pledge over ' + donationsReceived[j] + ' donations. This pledge has been setup with a multiplier of ' + multiplier[j] + ', so others would need to contribute an extra 1/' + multiplier[j] + ' of the amount pledged of ' + amountPledged[j] + ' for it to be marked as successful. This pledge has an active status of ' + active[j] + ' and a successful status of ' + successful[j] + '. It was started at ' + timeStarted[j] + '. <br><hr><number id="\' + j + \'"><a href="#!" onclick="contribute()">Contribute to this pledge</a></number> | <a href="http://www.ethpledge.com/id/\' + j + \'">Permalink</a>'
+            p.innerHTML = '<b>Pledge ID ' + j + '</b>: <i>' + description1[j] + description2[j] + description3[j] + description4[j] + '</i> <br> Begun by address ' + benefactor[j] + ', who has pledged to donate <b>' + amountPledged[j] + ' Ether</b> to address ' + charity[j] + '. So far ' + amountRaised[j] + ' Ether has been contributed to this pledge over ' + donationsReceived[j] + ' donations. This pledge has been setup with a multiplier of ' + multiplier[j] + ', so others would need to contribute an extra 1/' + multiplier[j] + ' of the amount pledged of ' + amountPledged[j] + ' for it to be marked as successful. This pledge has an active status of ' + active[j] + ' and a successful status of ' + successful[j] + '. It was started at ' + timeStarted[j] + '. <br><hr><number id="' + j + '"><a href="#!" onclick="contribute()">Contribute to this pledge</a></number> | <a href="http://www.ethpledge.com/id/' + j + '">Permalink</a>'
         }
 
     }
+    console.log('j is ' + j)
     campaignsTables.appendChild(p)
 }
 
@@ -209,7 +279,7 @@ window.addEventListener('load', function () {
                     // rinkeby
 
           if (url == '/') {
-              campaignsTables.innerHTML = '<img src="https://www.cryptosprites.com/sprites/' + 'spinner' + '.gif" align="middle" style="vertical-align:bottom" class="centerloader">'
+              campaignsTables.innerHTML = '<img src="http://ethpledge.com/' + 'spinner' + '.gif" align="middle" style="vertical-align:bottom" class="centerloader">'
 
               EthPledge.deployed().then(function (contractInstance) {
                   contractInstance.generalInfo.call().then(function (result) {
@@ -232,6 +302,8 @@ window.addEventListener('load', function () {
                                       amountPledged[i] = results[2]/1000000000000000000
                                       amountRaised[i] = results[3]/1000000000000000000
                                       donationsReceived[i] = results[4]
+                                      description1[i] = web3.toAscii(results[5])
+                                      description2[i] = web3.toAscii(results[6])
 
                                       console.log('benefactor: ' + benefactor[i])
                                       console.log('charity: ' + charity[i])
@@ -266,13 +338,14 @@ window.addEventListener('load', function () {
                                       active[j] = results[1]
                                       successful[j] = results[2]
                                       timeStarted[j] = date.toLocaleString()
-                                      description[j] = web3.toAscii(results[4])
+                                      description3[j] = web3.toAscii(results[4])
+                                      description4[j] = web3.toAscii(results[4])
 
                                       console.log('multiplier: ' + multiplier[j])
                                       console.log('active: ' + active[j])
                                       console.log('successful: ' + successful[j])
                                       console.log('timeStarted: ' + timeStarted[j])
-                                      console.log('description: ' + description[j])
+                                      // console.log('description: ' + description[j])
 
                                       loadCampaignTable()
 
@@ -311,7 +384,7 @@ window.addEventListener('load', function () {
 
               let campaignsTables = document.getElementById('campaignTables')
 
-              campaignsTables.innerHTML = '<img src="https://www.cryptosprites.com/sprites/' + 'spinner' + '.gif" align="middle" style="vertical-align:bottom" class="centerloader">'
+              campaignsTables.innerHTML = '<img src="http://ethpledge.com/' + 'spinner' + '.gif" align="middle" style="vertical-align:bottom" class="centerloader">'
 
 
                       EthPledge.deployed().then(function (contractInstance) {
@@ -327,6 +400,8 @@ window.addEventListener('load', function () {
                                       amountPledged[j] = results[2]/1000000000000000000
                                       amountRaised[j] = results[3]/1000000000000000000
                                       donationsReceived[j] = results[4]
+                                      description1[j] = web3.toAscii(results[5])
+                                      description2[j] = web3.toAscii(results[6])
 
                                       console.log('benefactor: ' + benefactor[j])
                                       console.log('charity: ' + charity[j])
@@ -361,13 +436,14 @@ window.addEventListener('load', function () {
                                       active[j] = results[1]
                                       successful[j] = results[2]
                                       timeStarted[j] = date.toLocaleString()
-                                      description[j] = web3.toAscii(results[4])
+                                      description3[j] = web3.toAscii(results[4])
+                                      description4[j] = web3.toAscii(results[5])
 
                                       console.log('multiplier: ' + multiplier[j])
                                       console.log('active: ' + active[j])
                                       console.log('successful: ' + successful[j])
                                       console.log('timeStarted: ' + timeStarted[j])
-                                      console.log('description: ' + description[j])
+                                      // console.log('description: ' + description[j])
 
 
 
@@ -378,6 +454,10 @@ window.addEventListener('load', function () {
 
                           displayCampaigns2().then(() => {
                               console.log('all done')
+
+                          if (benefactor[j] == web3.eth.accounts[0]) {
+                              main.innerHTML = '<div id="campaignTables"></div><div id="listCampaignDonations"><br><h4>Latest Donations</h4></div><hr><div class="center"><a href="http://www.ethpledge.com">[Return To Homepage]</a><hr><a href="#!" onclick="cancelPledge()">OWNER FUNCTION: Click here to cancel this pledge</a></div>'
+                          }
 
                           loadCampaignTable()
 
@@ -424,16 +504,20 @@ window.addEventListener('load', function () {
 
           } else if (url == '/create-pledge') {
 
-              main.innerHTML = 'Use the form below to create a pledge to donate an amount of Ether to a certain charity. <i>/Address</i> is the address of the Ethereum account you\'re pledging to donate to, such as 0xb30cb3b3E03A508Db2A0a3e07BA1297b47bb0fb1. <i>Amount</i> is the amount of Ether you\'ll be putting up. <i>Multiplier</i> is how many times more Ether you\'re putting up than what needs to be contributed by others for the pledge to be successful. For example, if you pledge to donate 10 Ether and have a multiplier of 5, others would only need to contribute 2 Ether (10/5) for the pledge to be successful and the Ether to be donated (a multiplier of 1 would probably be most common, where you\'re simply matching everyone else\'s donations by the same amount). <i>Description</i> is a very short description of your pledge (maximum of 32 characters) - probably for this you can just write the organization being donated to.<hr><div id="campaignForm"></div><hr><div class="center"><a href="http://www.ethpledge.com">[Return To Homepage]</a></div>'
+            /*
+              main.innerHTML = 'Use the form below to create a pledge to donate an amount of Ether to a certain charity. <i>Address</i> is the address of the Ethereum account you\'re pledging to donate to, such as 0xb30cb3b3E03A508Db2A0a3e07BA1297b47bb0fb1. <i>Amount</i> is the amount of Ether you\'ll be putting up. <i>Multiplier</i> is how many times more Ether you\'re putting up than what needs to be contributed by others for the pledge to be successful. For example, if you pledge to donate 10 Ether and have a multiplier of 5, others would only need to contribute 2 Ether (10/5) for the pledge to be successful and the Ether to be donated (a multiplier of 1 would probably be most common, where you\'re simply matching everyone else\'s donations by the same amount). <i>Description</i> is a very short description of your pledge (maximum of 128 characters) - probably for this you can just write the organization being donated to.<hr><div id="campaignForm"></div><hr><div class="center"><a href="http://www.ethpledge.com">[Return To Homepage]</a></div>'
+              */
+
+              main.innerHTML = '<p>Use the form below to create a pledge to donate an amount of Ether to a certain charity. You\'ll be sending the amount of Ether you\'re pledging to donate to the EthPledge smart contract, where it will remain until the donation target from others gets reached, upon which it will be sent to the recipient. If you choose later to cancel the pledge, you\'ll get a refund of your pledge amount in line with how much others have donated - if you cancel the pledge when 10% of the donation target has been reached, for example, 10% of your pledge amount (along with the donations) will be sent the the charity address, and 90% of the pledge amount you put up will be returned to you.</p><p>Note that the last field in the form below (<i>Multiplier</i>) is how many times more Ether you\'re putting up than what needs to be contributed by others for the pledge to be successful. For example, if you pledge to donate 10 Ether and have a multiplier of 5, others would only need to contribute 2 Ether (10/5) for the pledge to be successful and the Ether to be donated (a multiplier of 1 would probably be most common, where you\'re simply matching everyone else\'s donations by the same amount).</p><hr><div id="campaignForm"></div><hr><div class="center"><a href="http://www.ethpledge.com">[Return To Homepage]</a></div>'
 
               campaignForm.innerHTML = '<div class="form-group">\n' +
                   '            <textarea class="form-control" rows="1" id="address" placeholder="Enter the Ethereum address to donate to" style="overflow:auto"></textarea>\n' +
                   '        </div><div class="form-group">\n' +
                   '            <textarea class="form-control" rows="1" id="amountToPledge" placeholder="Amount of Ether to pledge - can enter decimals (eg. 0.0123)" style="overflow:auto"></textarea>\n' +
                   '        </div><div class="form-group">\n' +
-                  '            <textarea class="form-control" rows="1" id="multiplier" placeholder="Multiplier (enter 1 if you\'re just matching other donations up to the pledge amount)" style="overflow:auto"></textarea>\n' +
+                  '            <textarea class="form-control" rows="1" id="description" placeholder="Short description (max 128 characters)" style="overflow:auto"></textarea>\n' +
                   '        </div><div class="form-group">\n' +
-                  '            <textarea class="form-control" rows="1" id="description" placeholder="Short description (max 32 characters)" style="overflow:auto"></textarea>\n' +
+                  '            <textarea class="form-control" rows="1" id="multiplier" placeholder="Multiplier (enter 1 if you\'re just matching other donations up to the pledge amount)" style="overflow:auto"></textarea>\n' +
                   '        </div><a href="#!" onclick="createPledge()" button id="createPledgeButton" class="btn btn-primary btn-block">Create Pledge!</a>'
 
 
@@ -445,6 +529,14 @@ window.addEventListener('load', function () {
         default:
                 // nothing
 
+          if (url == '/') {
+              campaignTables.innerHTML = '<b>Unable to load campaigns -- You are not connected to the Ethereum mainet.</b> To use this service, you\'ll need to download <a href="https://metamask.io/">MetaMask</a>, a browser extension available for Chrome and Firefox which allows you to connect to the Ethereum mainnet. Installing the extension only takes a minute.'
+          } else if (url == 'create-pledge') {
+              main.innerHTML = '<b>You are not connected to the Ethereum mainet.</b> To create a pledge, you\'ll need to download <a href="https://metamask.io/">MetaMask</a>, a browser extension available for Chrome and Firefox which allows you to connect to the Ethereum mainnet. Installing the extension only takes a minute.'
+          } else if (url.startsWith("/id/")) {
+              main.innerHTML = '<b>You are not connected to the Ethereum mainet.</b> To view information on a pledge, you\'ll need to download <a href="https://metamask.io/">MetaMask</a>, a browser extension available for Chrome and Firefox which allows you to connect to the Ethereum mainnet. Installing the extension only takes a minute.'
+          }
+
       }
     })
   } else {
@@ -455,5 +547,4 @@ window.addEventListener('load', function () {
 
   App.start()
 
-    // openNav()
 })
