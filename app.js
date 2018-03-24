@@ -282,7 +282,7 @@ function go() {
                                 successful[j] = results[2]
                                 timeStarted[j] = date.toLocaleString()
                                 description3[j] = web3.toAscii(results[4])
-                                description4[j] = web3.toAscii(results[4])
+                                description4[j] = web3.toAscii(results[5])
 
                                 console.log('multiplier: ' + multiplier[j])
                                 console.log('active: ' + active[j])
