@@ -215,6 +215,18 @@ window.cancelPledge = function () {
 
 function go() {
 
+    let main = document.getElementById('maintable')
+
+    let campaignsTables = document.getElementById('campaignTables')
+
+    let infoBox = document.getElementById('infoBox')
+
+    let divContent = document.getElementById('divContent')
+
+    let statusLeft = document.getElementById('statusLeft')
+
+    let url = window.location.pathname
+
     if (url == '/') {
         campaignsTables.innerHTML = '<img src="http://ethpledge.com/' + 'spinner' + '.gif" align="middle" style="vertical-align:bottom" class="centerloader">'
 
@@ -465,6 +477,18 @@ function go() {
 
 function tellUserToSwitch() {
 
+    let main = document.getElementById('maintable')
+
+    let campaignsTables = document.getElementById('campaignTables')
+
+    let infoBox = document.getElementById('infoBox')
+
+    let divContent = document.getElementById('divContent')
+
+    let statusLeft = document.getElementById('statusLeft')
+
+    let url = window.location.pathname
+
     if (url == '/') {
         campaignTables.innerHTML = 'Please switch MetaMask to the mainnet or rinkeby.'
     } else if (url == 'create-pledge') {
@@ -511,17 +535,17 @@ window.addEventListener('load', function () {
         // Use Mist/MetaMask's provider
     window.web3 = new Web3(web3.currentProvider)
 
-    let main = document.getElementById('maintable')
+      let main = document.getElementById('maintable')
 
-    let campaignsTables = document.getElementById('campaignTables')
+      let campaignsTables = document.getElementById('campaignTables')
 
-    let infoBox = document.getElementById('infoBox')
+      let infoBox = document.getElementById('infoBox')
 
-    let divContent = document.getElementById('divContent')
+      let divContent = document.getElementById('divContent')
 
-    let statusLeft = document.getElementById('statusLeft')
+      let statusLeft = document.getElementById('statusLeft')
 
-    let url = window.location.pathname
+      let url = window.location.pathname
 
     web3.version.getNetwork((err, netId) => {
       switch (netId) {
