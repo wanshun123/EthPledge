@@ -219,12 +219,6 @@ function go() {
 
     let campaignsTables = document.getElementById('campaignTables')
 
-    let infoBox = document.getElementById('infoBox')
-
-    let divContent = document.getElementById('divContent')
-
-    let statusLeft = document.getElementById('statusLeft')
-
     let url = window.location.pathname
 
     if (url == '/') {
@@ -481,17 +475,11 @@ function tellUserToSwitch() {
 
     let campaignsTables = document.getElementById('campaignTables')
 
-    let infoBox = document.getElementById('infoBox')
-
-    let divContent = document.getElementById('divContent')
-
-    let statusLeft = document.getElementById('statusLeft')
-
     let url = window.location.pathname
 
     if (url == '/') {
         campaignTables.innerHTML = 'Please switch MetaMask to the mainnet or rinkeby.'
-    } else if (url == 'create-pledge') {
+    } else if (url == '/create-pledge') {
         main.innerHTML = 'Please switch MetaMask to the mainnet or rinkeby.'
     } else if (url.startsWith("/id/")) {
         main.innerHTML = 'Please switch MetaMask to the mainnet or rinkeby.'
@@ -535,17 +523,7 @@ window.addEventListener('load', function () {
         // Use Mist/MetaMask's provider
     window.web3 = new Web3(web3.currentProvider)
 
-      let main = document.getElementById('maintable')
-
-      let campaignsTables = document.getElementById('campaignTables')
-
-      let infoBox = document.getElementById('infoBox')
-
-      let divContent = document.getElementById('divContent')
-
-      let statusLeft = document.getElementById('statusLeft')
-
-      let url = window.location.pathname
+      App.start()
 
     web3.version.getNetwork((err, netId) => {
       switch (netId) {
@@ -556,7 +534,7 @@ window.addEventListener('load', function () {
 
             break
         case '2':
-                    // dunno
+                    // morden?
 
           tellUserToSwitch()
 
@@ -574,15 +552,9 @@ window.addEventListener('load', function () {
 
             break
         default:
-                // nothing
+                // unknown
 
-          if (url == '/') {
-              campaignTables.innerHTML = '<b>Unable to load campaigns -- You are not connected to the Ethereum mainet.</b> To use this service, you\'ll need to download <a href="https://metamask.io/">MetaMask</a>, a browser extension available for Chrome and Firefox which allows you to connect to the Ethereum mainnet. Installing the extension only takes a minute.'
-          } else if (url == 'create-pledge') {
-              main.innerHTML = '<b>You are not connected to the Ethereum mainnet.</b> To create a pledge, you\'ll need to download <a href="https://metamask.io/">MetaMask</a>, a browser extension available for Chrome and Firefox which allows you to connect to the Ethereum mainnet. Installing the extension only takes a minute.'
-          } else if (url.startsWith("/id/")) {
-              main.innerHTML = '<b>You are not connected to the Ethereum mainnet.</b> To view information on a pledge, you\'ll need to download <a href="https://metamask.io/">MetaMask</a>, a browser extension available for Chrome and Firefox which allows you to connect to the Ethereum mainnet. Installing the extension only takes a minute.'
-          }
+          tellUserToSwitch()
 
       }
     })
@@ -590,8 +562,20 @@ window.addEventListener('load', function () {
         // nothing
     console.warn("No web3 detected. Falling back to http://localhost:8545. You should remove this fallback when you deploy live, as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask")
 
-  }
+      let main = document.getElementById('maintable')
 
-  App.start()
+      let campaignsTables = document.getElementById('campaignTables')
+
+      let url = window.location.pathname
+
+      if (url == '/') {
+          campaignTables.innerHTML = '<b>Unable to load campaigns -- You are not connected to the Ethereum mainet.</b> To use this service, you\'ll need to download <a href="https://metamask.io/">MetaMask</a>, a browser extension available for Chrome and Firefox which allows you to connect to the Ethereum mainnet. Installing the extension only takes a minute.'
+      } else if (url == '/create-pledge') {
+          main.innerHTML = '<b>You are not connected to the Ethereum mainnet.</b> To create a pledge, you\'ll need to download <a href="https://metamask.io/">MetaMask</a>, a browser extension available for Chrome and Firefox which allows you to connect to the Ethereum mainnet. Installing the extension only takes a minute.'
+      } else if (url.startsWith("/id/")) {
+          main.innerHTML = '<b>You are not connected to the Ethereum mainnet.</b> To view information on a pledge, you\'ll need to download <a href="https://metamask.io/">MetaMask</a>, a browser extension available for Chrome and Firefox which allows you to connect to the Ethereum mainnet. Installing the extension only takes a minute.'
+      }
+
+  }
 
 })
