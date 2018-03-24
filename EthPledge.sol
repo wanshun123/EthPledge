@@ -8,6 +8,8 @@ Matching pledges of this kind are quite common (companies may pledge to match al
 
 Note that as Ethereum is still relatively new at this stage, not many charities have an Ethereum address to take donations yet, though it's our hope that more will come. The main charity with an Ethereum donation address at this time is Heifer International, whose Ethereum address is 0xb30cb3b3E03A508Db2A0a3e07BA1297b47bb0fb1 (see https://www.heifer.org/what-you-can-do/give/digital-currency.html)
 
+Visit EthPledge.com to play with this smart contract. Reach out: contact@EthPledge.com
+
 */
 
 contract EthPledge {
@@ -83,9 +85,10 @@ contract EthPledge {
     
     function cancelCampaign (uint campaignID) {
         
-        // If the benefactor cancels their campaign, they get a refund of their pledge amount in line with how much others have donated - if you cancel the pledge when 10% of the donation target has been reached, for example, 10% of their pledge amount (along with the donations) will be sent to the charity address, and 90% of the pledge amount you put up will be returned to you
+        // If the benefactor cancels their campaign, they get a refund of their pledge amount in line with how much others have donated - if you cancel the pledge when 10% of the donation target has been reached, for example, 10% of the pledge amount (along with the donations) will be sent to the charity address, and 90% of the pledge amount you put up will be returned to you
         
         require (msg.sender == campaign[campaignID].benefactor);
+        require (campaign[campaignID].active == true);
         campaign[campaignID].active = false;
         campaign[campaignID].successful = false;
         uint amountShort = campaign[campaignID].amountPledged - (campaign[campaignID].amountRaised * campaign[campaignID].multiplier);
@@ -96,7 +99,7 @@ contract EthPledge {
     
     function contributeToCampaign (uint campaignID) payable {
         require (msg.value > 0);
-        require (campaign[campaignID].active = true);
+        require (campaign[campaignID].active == true);
         campaignIDsDonatedToByUser[msg.sender].push(campaignID);
         addressToCampaignIDToFundsDonated[msg.sender][campaignID] += msg.value;
         
@@ -110,9 +113,9 @@ contract EthPledge {
         campaign[campaignID].amountRaised += msg.value;
         if (campaign[campaignID].amountRaised >= (campaign[campaignID].amountPledged / campaign[campaignID].multiplier)) {
             // Target reached
-            campaign[campaignID].charity.transfer(campaign[campaignID].amountRaised + campaign[campaignID].amountPledged);
             campaign[campaignID].active = false;
             campaign[campaignID].successful = true;
+            campaign[campaignID].charity.transfer(campaign[campaignID].amountRaised + campaign[campaignID].amountPledged);
         }
     }
     
