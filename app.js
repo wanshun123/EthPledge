@@ -45,10 +45,6 @@ var description4 = []
 
     }
 
-function openNav () {
-  document.getElementById('myNav').style.width = '100%'
-}
-
 window.openNav = function () {
   document.getElementById('myNav').style.width = '100%'
 }
